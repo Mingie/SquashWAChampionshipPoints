@@ -11,8 +11,8 @@
 <!-- Original Page -->
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h1 class="text-center">Admin Control Page</h1>
+        <div class="col-md-12">
+            <h1 class="text-center">Admin Control</h1>
 
             <div>
                 <h4>Displayed Credentials:</h4>
@@ -24,6 +24,9 @@
             <a class="btn btn-primary" asp-area="" asp-page="/Players/PlayerIndex">
                 Player Management
             </a>
+            <a class="btn btn-primary" asp-area="" asp-page="/Players/TournamentIndex">
+                Tournament Management
+            </a>
 
 
 
@@ -31,12 +34,69 @@
     </div>
 </div>
 
+<!-- Add the two tables for men and women -->
+<div class="container">
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2 class="text-center">Men</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.MenPlayers.OrderByDescending(p => p.championshipPoints).Select((player, index) => new { Player = player, Position = index + 1 }))
+                    {
+                        <tr>
+                            <td>@item.Position</td>
+                            <td>@item.Player.firstName</td>
+                            <td>@item.Player.lastName</td>
+                            <td>@item.Player.championshipPoints</td>
+                        </tr>
+                    }
+                </tbody>
 
 
+            </table>
+        </div>
 
+        <div class="col-md-6">
+            <h2 class="text-center">Women</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.WomenPlayers.OrderByDescending(p => p.championshipPoints).Select((player, index) => new { Player = player, Position = index + 1 }))
+                    {
+                        <tr>
+                            <td>@item.Position</td>
+                            <td>@item.Player.firstName</td>
+                            <td>@item.Player.lastName</td>
+                            <td>@item.Player.championshipPoints</td>
+                        </tr>
+                    }
+                </tbody>
 
-
-
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Add space between the tables and the bottom of the page -->
+<style>
+    .mt-4 {
+        margin-bottom: 60px; /* Adjust the value based on your preference */
+    }
+</style>
 
 
 

@@ -1,0 +1,307 @@
+﻿@page
+@model squashwachampionshippoints.Pages.Players.TournamentIndexModel
+@{
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<div class="container mt-5">
+    <!-- Check if there is a success message in TempData and display it -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <h1 class="text-center">Tournament Register</h1>
+        <div class="btn-group">
+            <span class="btn-label mr-2 mb-1" style="font-size: 1.5rem;">Mens</span>
+            <!-- Button to open modal -->
+            <button type="button" class="btn btn-primary mr-2 rounded-left" data-toggle="modal" data-target="#mensPSA">
+                PSA
+            </button>
+            <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#addTournamentModal8">
+                + Event (8)
+            </button>
+            <!-- Button to go back to the admin control page -->
+            <a class="btn btn-secondary" asp-area="" asp-page="/AdminControl">
+                Back
+            </a>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-5">
+    <table class="table mt-2 mb-10">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Tournament Name</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.listTournament)
+            {
+                <tr>
+                    <td>@item.date.ToString("dd/MM/yyyy")</td>
+                    <td>@item.tournamentName</td>
+                    <td>
+                        <a class="btn btn-primary" asp-area="" asp-page="/Players/EditPage">
+                            Edit
+                        </a>
+                        <td>
+                        <!-- Use a form for the delete action -->
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@item.id" onsubmit="return confirm('Are you sure you want to delete this tournament?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+<!-- Modal for entering Mens PSA information -->
+<div class="modal" id="mensPSA" tabindex="-1" role="dialog" aria-labelledby="addTournamentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- Concatenate "Mens" with the tournament title -->
+                <h5 class="modal-title" id="addTournamentModalLabel">Mens - PSA Tournament</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row mb-3">
+                    <!-- Remove the form-group for "gender" -->
+                </div>
+                <!-- Form for entering tournament information -->
+                <form method="POST">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="date">Date:</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                            <input type="hidden" name="level" value="PSA" value="@Model.tournamentInfo.level">
+                            <input type="hidden" name="drawSize" value="16" value="@Model.tournamentInfo.drawSize">
+                        <div class="form-group col-md-6">
+                            <label for="tournamentName">Tournament Name:</label>
+                            <input type="text" class="form-control" id="tournamentName" name="tournamentName" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="champion">Champion:</label>
+                            <input list="menPlayers" class="form-control" id="champion" name="champion" value="@Model.tournamentInfo.champion" required>
+                            <datalist id="menPlayers">
+                                @if (Model.MenPlayers != null && Model.MenPlayers.Any())
+                                {
+                                    var sortedPlayers = Model.MenPlayers.OrderByDescending(player => player.championshipPoints);
+                                    foreach (var player in sortedPlayers)
+                                    {
+                                        <option value="@($"{player.firstName} {player.lastName} - {player.championshipPoints}")"></option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="">No male players available</option>
+                                }
+                            </datalist>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="runnerUp">Runner Up:</label>
+                                <input list="menPlayers" class="form-control" id="runnerUp" name="runnerUp" value="@Model.tournamentInfo.runnerUp" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="sf1">Semi-Finalist 1:</label>
+                                <input list="menPlayers" class="form-control" id="sf1" name="sf1" value="@Model.tournamentInfo.sf1" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="sf2">Semi-Finalist 2:</label>
+                                <input list="menPlayers" class="form-control" id="sf2" name="sf2" value="@Model.tournamentInfo.sf2" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="qf1">Quarter-Finalist 1:</label>
+                                <input list="menPlayers" class="form-control" id="qf1" name="qf1" value="@Model.tournamentInfo.qf1" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="qf2">Quarter-Finalist 2:</label>
+                                <input list="menPlayers" class="form-control" id="qf2" name="qf2" value="@Model.tournamentInfo.qf2" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="qf3">Quarter-Finalist 3:</label>
+                                <input list="menPlayers" class="form-control" id="qf3" name="qf3" value="@Model.tournamentInfo.qf3" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="qf4">Quarter-Finalist 4:</label>
+                                <input list="menPlayers" class="form-control" id="qf4" name="qf4" value="@Model.tournamentInfo.qf4" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal for initial tournament setup -->
+<div class="modal" id="addTournamentModal" tabindex="-1" role="dialog" aria-labelledby="addTournamentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTournamentModalLabel">Enter Tournament Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for entering tournament information -->
+                <form method="POST">
+                    <div class="form-row">
+                        <!-- Date and Tournament Name side by side -->
+                        <div class="form-group col-md-6">
+                            <label for="date">Date:</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="tournamentName">Tournament Name:</label>
+                            <input type="text" class="form-control" id="tournamentName" name="tournamentName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <!-- Men's Column -->
+                        <div class="form-group col-md-6">
+                            <label for="menLevel">Men's Level:</label>
+                            <select class="form-control" id="menLevel" name="menLevel">
+                                <option value="PSA">PSA</option>
+                                <option value="Satellite">Satellite</option>
+                                <option value="Open">Open</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                            <label for="menDrawSize">Men's Draw Size:</label>
+                            <select class="form-control" id="menDrawSize" name="menDrawSize">
+                                <option value="16">16</option>
+                                <option value="8">8</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                        </div>
+                        <!-- Women's Column -->
+                        <div class="form-group col-md-6">
+                            <label for="womenLevel">Women's Level:</label>
+                            <select class="form-control" id="womenLevel" name="womenLevel">
+                                <option value="PSA">PSA</option>
+                                <option value="Satellite">Satellite</option>
+                                <option value="Open">Open</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                            <label for="womenDrawSize">Women's Draw Size:</label>
+                            <select class="form-control" id="womenDrawSize" name="womenDrawSize">
+                                <option value="16">16</option>
+                                <option value="8">8</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal for entering tournament 8 information -->
+<div class="modal" id="addTournamentModal8" tabindex="-1" role="dialog" aria-labelledby="addTournamentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTournamentModalLabel">Enter Tournament Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for entering tournament information -->
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tournamentName">Tournament Name:</label>
+                        <input type="text" class="form-control" id="tournamentName" name="tournamentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select class="form-control" id="gender" name="gender">
+                            <option value="Men">Men</option>
+                            <option value="Women">Women</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="level">Level:</label>
+                        <select class="form-control" id="level" name="level">
+                            <option value="PSA">PSA</option>
+                            <option value="Satellite">Satellite</option>
+                            <option value="Open">Open</option>
+                        </select>
+                    </div>
+                        <div class="form-group">
+                            <label for="champion">Champion:</label>
+                            <input type="text" class="form-control" id="champion" name="champion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="runnerUp">Runner Up:</label>
+                            <input type="text" class="form-control" id="runnerUp" name="runnerUp" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sf1">SF1:</label>
+                            <input type="text" class="form-control" id="sf1" name="sf1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sf2">SF2:</label>
+                            <input type="text" class="form-control" id="sf2" name="sf2" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="plateWinner">Plate Winner:</label>
+                            <input type="text" class="form-control" id="plateWinner" name="plateWinner" required>
+                        </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+

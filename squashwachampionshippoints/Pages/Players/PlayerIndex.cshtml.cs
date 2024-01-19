@@ -9,13 +9,13 @@ namespace squashwachampionshippoints.Players
 {
     public class PlayerIndexModel : PageModel
     {
-        private readonly ILogger<PlayerIndexModel> _logger;
+        //private readonly ILogger<PlayerIndexModel> _logger;
 
         // Inject an ILogger instance in the constructor
-        public PlayerIndexModel(ILogger<PlayerIndexModel> logger)
-        {
-            _logger = logger;
-        }
+        //public PlayerIndexModel(ILogger<PlayerIndexModel> logger)
+        //{
+            //_logger = logger;
+        //}
 
         public List<PlayerInfo> listPlayers = new List<PlayerInfo>();
         public PlayerInfo playerInfo = new PlayerInfo();
@@ -29,6 +29,20 @@ namespace squashwachampionshippoints.Players
         {
             try
             {
+                // Check if the form is attempting to delete a player
+                if (Request.Form.ContainsKey("Delete"))
+                {
+                    int playerIdToDelete;
+                    if (int.TryParse(Request.Form["Delete"], out playerIdToDelete))
+                    {
+                        // Call the delete handler
+                        DeletePlayerFromDatabase(playerIdToDelete);
+
+                        // Reload the page after deletion
+                        return RedirectToPage("/Players/PlayerIndex");
+                    }
+                }
+
                 // Check if all required fields are filled out
                 if (string.IsNullOrEmpty(Request.Form["firstName"]) ||
                     string.IsNullOrEmpty(Request.Form["lastName"]) ||
@@ -65,10 +79,12 @@ namespace squashwachampionshippoints.Players
             catch (Exception ex)
             {
                 // Log the exception
-                _logger.LogError(ex, "An error occurred while processing the form submission.");
+                //_logger.LogError(ex, "An error occurred while processing the form submission.");
                 TempData["ErrorMessage"] = "An error occurred while saving player information.";
                 return RedirectToPage("/Players/PlayerIndex");
             }
+
+
         }
 
         private void SavePlayerToDatabase(PlayerInfo playerInfo)
@@ -86,12 +102,60 @@ namespace squashwachampionshippoints.Players
                     command.Parameters.AddWithValue("@firstName", playerInfo.firstName);
                     command.Parameters.AddWithValue("@lastName", playerInfo.lastName);
                     command.Parameters.AddWithValue("@gender", playerInfo.gender);
-                    command.Parameters.AddWithValue("@championshipPoints", playerInfo.championshipPoints);
+
+                    // Set championshipPoints to 0 explicitly
+                    command.Parameters.AddWithValue("@championshipPoints", playerInfo.championshipPoints ?? 0);
 
                     command.ExecuteNonQuery();
                 }
             }
         }
+
+        public IActionResult OnPostDelete(int id)
+        {
+            try
+            {
+                // Delete the player with the specified ID from the database
+                DeletePlayerFromDatabase(id);
+
+                // Return a success response
+                TempData["SuccessMessage"] = "Player deleted successfully";
+                return RedirectToPage("/Players/PlayerIndex");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                //_logger.LogError(ex, "An error occurred while deleting the player from the database.");
+                TempData["ErrorMessage"] = "An error occurred while deleting the player.";
+                return RedirectToPage("/Players/PlayerIndex");
+            }
+        }
+
+        private void DeletePlayerFromDatabase(int playerId)
+        {
+            String connectionString = "Data Source=HEDDWYNPC;Initial Catalog=playerregister;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                String sql = "DELETE FROM players WHERE Id = @playerId;";
+
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@playerId", playerId);
+                    command.ExecuteNonQuery();
+                }
+            }
+            // Sample code to delete from the listPlayers collection for demonstration purposes
+            var playerToDelete = listPlayers.FirstOrDefault(p => p.Id == playerId);
+            if (playerToDelete != null)
+            {
+                listPlayers.Remove(playerToDelete);
+            }
+        }
+
+
+
 
         private void RetrievePlayersFromDatabase()
         {
@@ -136,7 +200,7 @@ namespace squashwachampionshippoints.Players
             catch (Exception ex)
             {
                 // Log the exception
-                _logger.LogError(ex, "An error occurred while retrieving player information from the database.");
+                //_logger.LogError(ex, "An error occurred while retrieving player information from the database.");
             }
         }
     }
